@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام محاسبي متكامل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f0f2f5;
+            direction: rtl;
+        }
+
+        /* ===== القائمة الجانبية ===== */
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: #1a2332;
+            color: #fff;
+            padding: 20px 0;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: all 0.3s;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+        }
+        .sidebar .brand {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #2d3a4f;
+            margin-bottom: 15px;
+        }
+        .sidebar .brand h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #22c55e;
+        }
+        .sidebar .brand p {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .sidebar .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: 0.2s;
+            cursor: pointer;
+            border-right: 3px solid transparent;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .sidebar .menu-item:hover {
+            background: #2d3a4f;
+            color: #fff;
+        }
+        .sidebar .menu-item.active {
+            background: #2d3a4f;
+            color: #22c55e;
+            border-right-color: #22c55e;
+        }
+        .sidebar .menu-item i {
+            width: 24px;
+            margin-left: 12px;
+            font-size: 16px;
+        }
+        .sidebar .menu-item .badge {
+            margin-right: auto;
+            background: #22c55e;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        .sidebar .user-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 20px;
+            border-top: 1px solid #2d3a4f;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .sidebar .user-info .name {
+            color: #fff;
+            font-weight: 600;
+        }
+        .sidebar .user-info .date-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        /* ===== المحتوى الرئيسي ===== */
+        .main-content {
+            margin-right: 250px;
+            padding: 24px 30px;
+            min-height: 100vh;
+        }
+
+        /* ===== البطاقات ===== */
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a2332;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ===== الأزرار ===== */
+        .btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .btn-green { background: #22c55e; color: #fff; }
+        .btn-green:hover { background: #16a34a; }
+        .btn-blue { background: #3b82f6; color: #fff; }
+        .btn-blue:hover { background: #2563eb; }
+        .btn-red { background: #ef4444; color: #fff; }
+        .btn-red:hover { background: #dc2626; }
+        .btn-gray { background: #94a3b8; color: #fff; }
+        .btn-gray:hover { background: #64748b; }
+        .btn-print { background: #8b5cf6; color: #fff; }
+        .btn-print:hover { background: #7c3aed; }
+
+        /* ===== جداول ===== */
+        input, select, textarea {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            width: 100%;
+            background: #f8fafc;
+        }
+        input:focus, select:focus {
+            outline: 2px solid #22c55e;
+            outline-offset: 1px;
+            background: #fff;
+        }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: right; }
+        th { background: #f8fafc; font-weight: 600; color: #1a2332; }
+
+        /* ===== تبويبات المحتوى ===== */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ===== تجاوب ===== */
+        @media (max-width: 768px) {
+            .sidebar { width: 60px; padding: 10px 0; }
+            .sidebar .brand h2 { font-size: 12px; }
+            .sidebar .brand p { display: none; }
+            .sidebar .menu-item { padding: 10px 14px; font-size: 12px; }
+            .sidebar .menu-item span { display: none; }
+            .sidebar .menu-item i { margin-left: 0; }
+            .sidebar .user-info { font-size: 10px; padding: 10px; }
+            .sidebar .user-info .name { font-size: 10px; }
+            .sidebar .user-info .date-row { flex-direction: column; }
+            .main-content { margin-right: 60px; padding: 16px; }
+        }
+        @media print {
+            .sidebar { display: none; }
+            .main-content { margin: 0; padding: 0; }
+            .card { box-shadow: none; border: 1px solid #ddd; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== القائمة الجانبية ===== -->
+<div class="sidebar">
+    <div class="brand">
+        <h2>📊 محاسبي برو</h2>
+        <p>نظام الفوترة المتكامل</p>
+    </div>
+
+    <a class="menu-item active" data-tab="dashboard">
+        <i class="fas fa-home"></i><span>الرئيسية</span>
+    </a>
+    <a class="menu-item" data-tab="sales">
+        <i class="fas fa-cart-plus"></i><span>المبيعات</span>
+        <span class="badge" id="salesBadge">0</span>
+    </a>
+    <a class="menu-item" data-tab="purchases">
+        <i class="fas fa-truck"></i><span>المشتريات</span>
+    </a>
+    <a class="menu-item" data-tab="customers">
+        <i class="fas fa-users"></i><span>العملاء</span>
+        <span class="badge" id="customerBadge">0</span>
+    </a>
+    <a class="menu-item" data-tab="items">
+        <i class="fas fa-boxes"></i><span>الأصناف</span>
+        <span class="badge" id="itemBadge">0</span>
+    </a>
+    <a class="menu-item" data-tab="receipts">
+        <i class="fas fa-hand-holding-usd"></i><span>سند قبض</span>
+        <span class="badge" id="receiptBadge">0</span>
+    </a>
+    <a class="menu-item" data-tab="account">
+        <i class="fas fa-chart-line"></i><span>كشف حساب</span>
+    </a>
+    <a class="menu-item" data-tab="settings">
+        <i class="fas fa-cog"></i><span>إعدادات النظام</span>
+    </a>
+    <a class="menu-item" data-tab="data">
+        <i class="fas fa-database"></i><span>البيانات الأساسية</span>
+    </a>
+
+    <div class="user-info">
+        <div class="name"><i class="fas fa-user-circle"></i> Admin1</div>
+        <div class="date-row">
+            <span>المستخدم: الفرع الرئيسي</span>
+            <span id="contractStart">بداية العقد: 13/10/2025</span>
+            <span id="contractEnd">نهاية العقد: NaN/NaN/NaN</span>
+        </div>
+        <div class="date-row" style="margin-top:6px;font-size:11px;color:#64748b;">
+            <span id="currentLang">العربية</span>
+            <span>|</span>
+            <span id="currentDate"></span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== المحتوى الرئيسي ===== -->
+<div class="main-content">
+
+    <!-- ===== تبويب الرئيسية ===== -->
+    <section id="tab-dashboard" class="tab-content active">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">🏠 الرئيسية</h1>
+        <p class="text-gray-500 mb-6">مؤسسة مخبز رقائق غوار للمعجنات</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="card text-center" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border-radius: 16px; padding: 20px;">
+                <h3 class="text-3xl font-bold" id="statInvoices">0</h3>
+                <p class="opacity-90">الفواتير</p>
+            </div>
+            <div class="card text-center" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border-radius: 16px; padding: 20px;">
+                <h3 class="text-3xl font-bold" id="statCustomers">0</h3>
+                <p class="opacity-90">العملاء</p>
+            </div>
+            <div class="card text-center" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border-radius: 16px; padding: 20px;">
+                <h3 class="text-3xl font-bold" id="statItems">0</h3>
+                <p class="opacity-90">الأصناف</p>
+            </div>
+            <div class="card text-center" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 16px; padding: 20px;">
+                <h3 class="text-3xl font-bold" id="statRevenue">0</h3>
+                <p class="opacity-90">الإجمالي (ر.س)</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="card">
+                <h4 class="font-bold text-gray-700 mb-2">📋 آخر الفواتير</h4>
+                <div id="recentInvoices" class="text-sm text-gray-500">لا توجد فواتير بعد</div>
+            </div>
+            <div class="card">
+                <h4 class="font-bold text-gray-700 mb-2">💰 آخر سندات القبض</h4>
+                <div id="recentReceipts" class="text-sm text-gray-500">لا توجد سندات بعد</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== تبويب المبيعات ===== -->
+    <section id="tab-sales" class="tab-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">🧾 المبيعات</h2>
+        <div class="card">
+            <div class="card-title">إنشاء فاتورة مبيعات</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">العميل</label>
+                    <select id="invoiceCustomer" class="mt-1"><option value="">-- اختر --</option></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">طريقة الدفع</label>
+                    <select id="paymentMethod" class="mt-1">
+                        <option value="نقداً">نقداً</option>
+                        <option value="تحويل بنكي">تحويل بنكي</option>
+                        <option value="آجل">آجل</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">رقم الفاتورة</label>
+                    <input type="text" id="invoiceNumber" value="INV-2026-0001" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">التاريخ</label>
+                    <input type="date" id="invoiceDate" />
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">الأصناف</label>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>الوصف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th><th></th></tr>
+                        </thead>
+                        <tbody id="invoiceItemsBody"></tbody>
+                    </table>
+                </div>
+                <button id="addItemBtn" class="btn btn-green text-sm mt-2">➕ إضافة صنف</button>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-xl">
+                <div class="flex justify-between py-1"><span class="font-bold">المجموع (صافي):</span> <span id="invNet">0.00</span></div>
+                <div class="flex justify-between py-1"><span class="font-bold">ضريبة القيمة المضافة (15%):</span> <span id="invVat">0.00</span></div>
+                <div class="flex justify-between py-1 text-lg font-bold text-green-700"><span>الإجمالي:</span> <span id="invTotal">0.00</span></div>
+            </div>
+            <div class="flex flex-wrap gap-3 mt-4 no-print">
+                <button id="saveInvoiceBtn" class="btn btn-green">💾 حفظ الفاتورة</button>
+                <button id="resetInvoiceBtn" class="btn btn-gray">↺ إعادة تعيين</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📋 الفواتير المسجلة</div>
+            <div id="invoicesList" class="max-h-60 overflow-y-auto"></div>
+        </div>
+    </section>
+
+    <!-- ===== تبويب المشتريات ===== -->
+    <section id="tab-purchases" class="tab-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">🚚 المشتريات</h2>
+        <div class="card">
+            <p class="text-gray-500">قريباً... إدارة فواتير المشتريات والموردين</p>
+        </div>
+    </section>
+
+    <!-- ===== تبويب العملاء ===== -->
+    <section id="tab-customers" class="tab-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">👥 العملاء</h2>
+        <div class="card">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-bold text-blue-700 mb-2">إضافة عميل</h4>
+                    <div class="space-y-2">
+                        <input type="text" id="newCustomerName" placeholder="اسم العميل" />
+                        <input type="text" id="newCustomerVat" placeholder="الرقم الضريبي" />
+                        <input type="text" id="newCustomerPhone" placeholder="رقم السجل التجاري" />
+                        <input type="text" id="newCustomerAddress" placeholder="العنوان" />
+                        <button id="saveCustomerBtn" class="btn btn-green">إضافة عميل</button>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-blue-700 mb-2">قائمة العملاء</h4>
+                    <input type="text" id="searchCustomer" placeholder="بحث..." class="mb-2" />
+                    <ul id="customerList" class="space-y-1 max-h-60 overflow-y-auto"></ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== تبويب الأصناف ===== -->
+    <section id="tab-items" class="tab-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">📦 الأصناف</h2>
+        <div class="card">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-bold text-green-700 mb-2">إضافة صنف</h4>
+                    <div class="space-y-2">
+                        <input type="text" id="newItemName" placeholder="اسم الصنف" />
+                        <input type="number" id="newItemPrice" placeholder="السعر" step="0.01" />
+                        <input type="text" id="newItemUnit" placeholder="الوحدة" />
+                        <button id="saveItemBtn" class="btn btn-green">إضافة صنف</button>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-green-700 mb-2">قائمة الأصناف</h4>
+                    <ul id="itemsList" class="space-y-1 max-h-60 overflow-y-auto"></ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== تبويب سند قبض ===== -->
+    <section id="tab-receipts" class="tab-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">💰 سند قبض</h2>
+        <div class="card">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">العميل</label>
+                        <select id="receiptCustomer"><option value="">-- اختر --</option></select>
+                        <label class="block text-sm font-medium text-gray-700">المبلغ</label>
+                        <input type="number" id="receiptAmount" step="0.01" />
+                        <label class="block text-sm font-medium text-gray-700">التاريخ</label>
+                        <input type="date" id="receiptDate" />
+                        <label class="block text-sm font-medium text-gray-700">رقم الفاتورة (اختياري)</label>
+                        <input type="text" id="receiptInvoiceRef" placeholder="INV-001" />
+                        <button id="saveReceiptBtn" class="btn btn-green">حفظ سند القبض</button>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-700 mb-2">سندات القبض المسجلة</h4>
+                    <div id="receiptsList" class="max-h-60 overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== تبويب كشف حساب ===== -->
+    <section id="tab-account" class="tab-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">📊 كشف حساب</h2>
+        <div class="card">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">العميل</label>
+                    <select id="accountCustomer"><option value="">-- اختر --</option></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">من تاريخ</label>
+                    <input type="date" id="accountFrom" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">إلى تاريخ</label>
+                    <input type="date" id="accountTo" />
+                </div>
+            </div>
+            <div class="flex gap-3 no-print">
+                <button id="showAccountBtn" class="btn btn-blue">عرض الكشف</button>
+                <button id="printAccountBtn" class="btn btn-print">🖨️ طباعة</button>
+            </div>
+            <div id="accountResult" class="mt-4 p-4 bg-gray-50 rounded-xl">
+                <p class="text-gray-500">اختر عميلاً واضغط عرض</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== تبويب إعدادات النظام ===== -->
+    <section id="tab-settings" class="tab-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">⚙️ إعدادات النظام</h2>
+        <div class="card">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">اسم الشركة</label>
+                        <input type="text" id="companyName" />
+                        <label class="block text-sm font-medium text-gray-700">الرقم الضريبي</label>
+                        <input type="text" id="companyVat" />
+                        <label class="block text-sm font-medium text-gray-700">رقم السجل التجاري</label>
+                        <input type="text" id="companyReg" />
+                        <label class="block text-sm font-medium text-gray-700">العنوان</label>
+                        <input type="text" id="companyAddress" />
+                        <label class="block text-sm font-medium text-gray-700">الهاتف</label>
+                        <input type="text" id="companyPhone" />
+                        <label class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
+                        <input type="email" id="companyEmail" />
+                        <label class="block text-sm font-medium text-gray-700">رفع شعار الشركة</label>
+                        <input type="file" id="companyLogo" accept="image/*" />
+                        <button id="saveSettingsBtn" class="btn btn-green">حفظ الإعدادات</button>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-700 mb-2">معاينة الشعار</h4>
+                    <img id="settingsLogoPreview" src="" alt="شعار الشركة" class="company-logo border p-2 rounded-lg" style="max-height:120px;max-width:200px;" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== تبويب البيانات الأساسية ===== -->
+    <section id="tab-data" class="tab-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">🗄️ البيانات الأساسية</h2>
+        <div class="card">
+            <p class="text-gray-500">إدارة البيانات الأساسية للنظام (العملات، الضرائب، الوحدات، إلخ) - قريباً</p>
+        </div>
+    </section>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
